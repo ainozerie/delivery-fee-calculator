@@ -4,7 +4,7 @@ interface InputProps {
   id: string;
   placeholder?: string;
   onChange: React.ChangeEventHandler<HTMLInputElement>;
-  value: number;
+  value: string;
 } 
 
 export default function Input({id, placeholder, onChange, value} : InputProps) {
