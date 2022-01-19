@@ -9,7 +9,7 @@ import {round} from 'mathjs'
 interface FormData {
   cart_value: string,
   distance: string,
-  number_of_items: string,
+  amount_of_items: string,
   date_and_time: string,
   delivery_fee: number
 }
@@ -17,33 +17,34 @@ interface FormData {
 const calculatePrice = (FormData: FormData) => {
   if (+FormData.cart_value >= 100) return 0; // if cart value >= 100 => delivery fee = 0
   let surcharge;
-  let distance_fee;
+  let distance_fee = 2;
   let items_fee;
   let delivery_fee;
   let day = FormData.date_and_time.slice(0, 3);
   let hours = +FormData.date_and_time.slice(16, 18);
-  +FormData.cart_value >= 10 ? surcharge = 0 : surcharge = (10*100 - +FormData.cart_value*100) / 100; // by *10 and /10 we get accuracy 
-  +FormData.distance <= 1000 ? distance_fee = 0 : distance_fee = (((+FormData.distance - 1000) - (+FormData.distance) % 500) / 500 + 1) * 1; // additional fee for every 500m
-  +FormData.number_of_items <= 4 ? items_fee = 0 : items_fee = (+FormData.number_of_items - 4) * 0.5; // additional fee for items 
+  +FormData.cart_value >= 10 ? surcharge = 0 : surcharge = (10*100 - +FormData.cart_value*100) / 100; // by *100 and /100 we get accuracy 
+  +FormData.distance <= 1000 ? distance_fee = 2 : distance_fee += (((+FormData.distance - 1000) - (+FormData.distance % 500)) / 500) * 1; // additional fee for every 500m
+  if (+FormData.distance % 500 >= 1 && +FormData.distance > 1000) distance_fee += 1;
+  +FormData.amount_of_items <= 4 ? items_fee = 0 : items_fee = (+FormData.amount_of_items - 4) * 0.5; // additional fee for items 
   console.log(surcharge, distance_fee, items_fee);
   delivery_fee = surcharge + distance_fee + items_fee;
-  if (day === 'Fri' && hours >= 15 && hours <= 18) delivery_fee = round(((delivery_fee*100) * (1.1*100) / 10000), 2); // by *10 and /10 we get accuracy 
+  if (day === 'Fri' && hours >= 15 && hours <= 18) delivery_fee = round(((delivery_fee*100) * (1.1*100) / 10000), 2); // by *100 and /10000 we get accuracy 
   if (delivery_fee < 0) return 0;
-  return (delivery_fee >= 15 ? 15 : delivery_fee);
+  return (delivery_fee >= 15 ? 15 : round(delivery_fee, 2));
 }
 
 // default data for the from
 const defaultFormData = {
   cart_value: '',
   distance: '',
-  number_of_items: '',
+  amount_of_items: '',
   date_and_time: '',
   delivery_fee: 0
 }
 export default function Calculator() {
 
   const[formData, setFormData] = useState(defaultFormData);
-  const {cart_value, distance, number_of_items, delivery_fee} = formData;
+  const {cart_value, distance, amount_of_items, delivery_fee} = formData;
   // input handler: saving data from inputs
   const changeHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prevState) => ({
@@ -79,30 +80,30 @@ export default function Calculator() {
             <p className='title'>Fill in fields:</p>
           </div>
           <div className='calc_line'>
-          <Label htmlFor='cart_value' name='Cart value'/>
+            <Label htmlFor='cart_value' name='Cart value, €'/>
             <Input id='cart_value' onChange={changeHandler} placeholder='Cart value' value={cart_value} />
           </div>
           <div className='calc_line'>
-          <Label htmlFor='distance' name='Distance'/>
+            <Label htmlFor='distance' name='Distance, m'/>
             <Input id='distance' onChange={changeHandler} placeholder='Distance' value={distance} />
           </div>
           <div className='calc_line'>
-          <Label htmlFor='number_of_items' name='Number of items'/>
-            <Input id='number_of_items' onChange={changeHandler} placeholder='Number of items' value={number_of_items} />
+            <Label htmlFor='amount_of_items' name='Amount of items'/>
+            <Input id='amount_of_items' onChange={changeHandler} placeholder='Amount of items' value={amount_of_items} />
           </div>
           <div className='calc_line'>
-            <Label htmlFor='date_and_time' name='Date and time'/>
+            <Label name='Time'/>
             <Datetime input={true} initialValue={new Date()} onChange={dateHandler}/>
           </div>
           <div className='calc_line'>
-            <Button name='Calculate' onSubmit={submitHandler} />
-          </div>
-          <div className='calc_line'>
             <p className='final_cost_title'>Final delivery cost:</p>
-            <p className='final_cost' >{delivery_fee}€</p>
+            <p className='final_cost'>{delivery_fee}€</p>
           </div>
-          <div className='calc_line'>
-            <button onClick={clearHandler}>Clear</button>
+          <div className='calc_line btn_line'>
+            <Button name='Calculate delivery price' className='btn_calculate' onSubmit={submitHandler} />
+          </div>
+          <div className='calc_line btn_line'>
+            <button onClick={clearHandler} className='btn_clear'>Clear</button>
           </div>
         </form>
       </div>

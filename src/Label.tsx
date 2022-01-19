@@ -2,7 +2,7 @@ import React from 'react'
 
 interface LabelProps{
   name: string;
-  htmlFor: string
+  htmlFor?: string
 } 
 
 export default function Label({name, htmlFor} : LabelProps) {
