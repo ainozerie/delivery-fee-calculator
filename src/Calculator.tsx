@@ -77,7 +77,7 @@ export default function Calculator() {
       <div className='calculator'>
         <form>
           <div className='calc_line'>
-            <p className='title'>Fill in fields:</p>
+            <p className='title'>Fill in the fields:</p>
           </div>
           <div className='calc_line'>
             <Label htmlFor='cart_value' name='Cart value, €'/>

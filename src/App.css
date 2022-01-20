@@ -95,8 +95,7 @@ button {
   background-color: #323337;
 }
 .btn_clear:hover {
-  background-color: #FB4B4E;
-  scale: 1.05;
+  background-color: #f56f72;
 }
 .btn_calculate:hover {
   background-color: #69bde0;
