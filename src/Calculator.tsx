@@ -4,8 +4,8 @@ import Input from './Input'
 import Label from './Label'
 import "react-datetime/css/react-datetime.css";
 import Datetime from "react-datetime";
-import {round} from 'mathjs'
-// function to calculate price of delivery
+import {round} from 'mathjs'; // to round delivery price we get
+
 interface FormData {
   cart_value: string,
   distance: string,
@@ -14,20 +14,23 @@ interface FormData {
   delivery_fee: number
 }
 
+// function to calculate price of delivery
 const calculatePrice = (FormData: FormData) => {
   if (+FormData.cart_value >= 100) return 0; // if cart value >= 100 => delivery fee = 0
   let surcharge;
   let distance_fee = 2;
   let items_fee;
   let delivery_fee;
-  let day = FormData.date_and_time.slice(0, 3);
-  let hours = +FormData.date_and_time.slice(16, 18);
+  let day = FormData.date_and_time.slice(0, 3); // we save exact day from Datetimr
+  let hours = +FormData.date_and_time.slice(16, 18); // we save hours from datetime
+  // calculate surcharge, distance_fee, items_fee
   +FormData.cart_value >= 10 ? surcharge = 0 : surcharge = (10*100 - +FormData.cart_value*100) / 100; // by *100 and /100 we get accuracy 
   +FormData.distance <= 1000 ? distance_fee = 2 : distance_fee += (((+FormData.distance - 1000) - (+FormData.distance % 500)) / 500) * 1; // additional fee for every 500m
   if (+FormData.distance % 500 >= 1 && +FormData.distance > 1000) distance_fee += 1;
   +FormData.amount_of_items <= 4 ? items_fee = 0 : items_fee = (+FormData.amount_of_items - 4) * 0.5; // additional fee for items 
-  console.log(surcharge, distance_fee, items_fee);
+  
   delivery_fee = surcharge + distance_fee + items_fee;
+
   if (day === 'Fri' && hours >= 15 && hours <= 18) delivery_fee = round(((delivery_fee*100) * (1.1*100) / 10000), 2); // by *100 and /10000 we get accuracy 
   if (delivery_fee < 0) return 0;
   return (delivery_fee >= 15 ? 15 : round(delivery_fee, 2));
@@ -53,13 +56,14 @@ export default function Calculator() {
     }));
     console.log(Datetime);
   };
+  // date and time handler: saving picked date and time
   const dateHandler = (event: string | moment.Moment) => {
     setFormData((prevState) => ({
       ...prevState,
       date_and_time: event.toString()
     }));
   }
-  // button handler: prevent page reload, launch calculate price function, turn entered data to default
+  // button handler: prevent page reload, launch calculate price function
   const submitHandler = (event: React.FormEvent<HTMLButtonElement>) => {
     event.preventDefault();
     setFormData((prevState) => ({
@@ -67,6 +71,7 @@ export default function Calculator() {
       delivery_fee: calculatePrice(formData),
     }));
   };
+  // button handler: clear inputs and change entered data to default
   const clearHandler = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     event.preventDefault();
     setFormData(defaultFormData);
